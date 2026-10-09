@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Nutri BakeShop POS</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f1f8f4;
+        }
+
+        .pos-header {
+            background-color: #198754;
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pos-header h1 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .logout-button {
+            background-color: white;
+            color: #198754;
+            border: none;
+            border-radius: 7px;
+            padding: 9px 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #e9f7ef;
+        }
+
+        .layout {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .sidebar {
+            width: 210px;
+            flex-shrink: 0;
+            background-color: white;
+            padding: 18px 14px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .sidebar-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #777;
+            text-transform: uppercase;
+            margin: 4px 10px 12px;
+        }
+
+        .module-link {
+            display: block;
+            width: 100%;
+            padding: 11px 12px;
+            margin-bottom: 6px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #333;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .module-link:hover,
+        .module-link.active {
+            background-color: #e9f7ef;
+            color: #198754;
+        }
+
+        .module-icon {
+            display: inline-block;
+            width: 25px;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pos-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .products-section {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .products-section h2,
+        .receipt-section h2 {
+            margin-top: 0;
+            color: #198754;
+        }
+
+        .product-search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .product-search input {
+            flex: 1;
+            margin-bottom: 0;
+            padding: 11px 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        .search-button {
+            padding: 11px 18px;
+            background-color: #198754;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .search-button:hover {
+            background-color: #146c43;
+        }
+
+        .clear-search-button {
+            padding: 11px 18px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .clear-search-button:hover {
+            background-color: #5a6268;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .product-card {
+            background-color: #f8fffb;
+            border: 1px solid #d7eadf;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.10);
+        }
+
+        .product-image {
+            width: 130px;
+            height: 130px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 10px auto;
+            border-radius: 8px;
+        }
+
+        .product-card h3 {
+            margin: 5px 0 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .product-price {
+            color: #198754;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .quantity-control {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .quantity-control button {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 5px;
+            background-color: #198754;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .quantity-control button:hover {
+            background-color: #146c43;
+        }
+
+        .quantity-input {
+            width: 55px;
+            height: 30px;
+            padding: 4px;
+            margin: 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .quantity-input:focus {
+            border-color: #198754;
+            outline: none;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 9px;
+            background-color: #198754;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .add-button:hover {
+            background-color: #146c43;
+        }
+
+        .no-products {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #888;
+            padding: 30px;
+            font-size: 15px;
+        }
+
+        .receipt-section {
+            width: 500px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .receipt-number {
+            color: #198754;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: -8px;
+            margin-bottom: 12px;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .receipt-table th {
+            background-color: #eaf7ef;
+            color: #198754;
+            padding: 9px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .receipt-table td {
+            padding: 9px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        .remove-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 7px;
+            cursor: pointer;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #888;
+            padding: 20px 0;
+            font-size: 14px;
+        }
+
+        .total-box {
+            border-top: 2px solid #198754;
+            padding-top: 12px;
+            margin-top: 10px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .tax-row {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .grand-total {
+            font-size: 21px;
+            font-weight: bold;
+            color: #198754;
+        }
+
+        .payment-section {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+
+        .payment-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .payment-method {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .payment-method button {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #198754;
+            background-color: white;
+            color: #198754;
+            border-radius: 7px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .payment-method button.active {
+            background-color: #198754;
+            color: white;
+        }
+
+        .payment-field {
+            display: none;
+        }
+
+        .payment-field.active {
+            display: block;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+        }
+
+        input:focus {
+            border-color: #198754;
+            outline: none;
+        }
+
+        .complete-button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 5px;
+            background-color: #198754;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .complete-button:hover {
+            background-color: #146c43;
+        }
+
+        #paymentMessage {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 1000px) {
+
+            .pos-container {
+                flex-direction: column;
+            }
+
+            .receipt-section {
+                width: 100%;
+            }
+
+        }
+
+        @media (max-width: 800px) {
+
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+
+            .module-link {
+                display: inline-block;
+                width: auto;
+                margin-right: 4px;
+            }
+
+            .product-search {
+                flex-wrap: wrap;
+            }
+
+            .product-search input {
+                width: 100%;
+                flex-basis: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="pos-header">
+
+        <h1>Nutri BakeShop - Point of Sale</h1>
+
+        <button class="logout-button" onclick="logout()">
+            Logout
+        </button>
+
+    </div>
+
+    <div class="layout">
+
+        <aside class="sidebar">
+
+            <div class="sidebar-title">
+                Modules
+            </div>
+
+            <a class="module-link" href="index.html">
+                <span class="module-icon"></span>
+                Dashboard
+            </a>
+
+            <a class="module-link active" href="pos.html">
+                <span class="module-icon"></span>
+                POS
+            </a>
+
+            <a class="module-link" href="reservation.html">
+                <span class="module-icon"></span>
+                Reservation
+            </a>
+
+            <a class="module-link" href="orders.html">
+                <span class="module-icon"></span>
+                Orders
+            </a>
+
+            <a class="module-link" href="inventory.html">
+                <span class="module-icon"></span>
+                Inventory
+            </a>
+
+            <a class="module-link" href="reports.html">
+                <span class="module-icon"></span>
+                Reports
+            </a>
+
+            <a class="module-link" href="transaction.html">
+                <span class="module-icon"></span>
+                Transaction
+            </a>
+
+        </aside>
+
+        <main class="main-content">
+
+            <div class="pos-container">
+
+                <div class="products-section">
+
+                    <h2>Products</h2>
+
+                    <div class="product-search">
+
+                        <input
+                            type="text"
+                            id="productSearch"
+                            placeholder="Search product..."
+                            oninput="searchProducts()"
+                        >
+
+                        <button
+                            class="search-button"
+                            onclick="searchProducts()"
+                        >
+                            Search
+                        </button>
+
+                        <button
+                            class="clear-search-button"
+                            onclick="clearSearch()"
+                        >
+                            Clear
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="product-grid"
+                        id="productGrid"
+                    ></div>
+
+                </div>
+
+                <div class="receipt-section">
+
+                    <h2>Receipt</h2>
+
+                    <div class="receipt-number" id="receiptNumber">
+                        Receipt No.: 1
+                    </div>
+
+                    <table class="receipt-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="receiptBody"></tbody>
+
+                    </table>
+
+                    <div
+                        class="empty-cart"
+                        id="emptyCart"
+                    >
+                        No products added yet.
+                    </div>
+
+                    <div class="total-box">
+
+                        <div class="total-row">
+
+                            <span>
+                                Subtotal:
+                            </span>
+
+                            <span id="subtotal">
+                                ₱0.00
+                            </span>
+
+                        </div>
+
+                        <div class="total-row tax-row">
+
+                            <span>
+                                VAT (12%):
+                            </span>
+
+                            <span id="totalTax">
+                                ₱0.00
+                            </span>
+
+                        </div>
+
+                        <div class="total-row grand-total">
+
+                            <span>
+                                Total Amount:
+                            </span>
+
+                            <span id="totalAmount">
+                                ₱0.00
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="payment-section">
+
+                        <h3>
+                            Payment Method
+                        </h3>
+
+                        <div class="payment-method">
+
+                            <button
+                                id="cashButton"
+                                class="active"
+                                onclick="selectPayment('cash')"
+                            >
+                                Cash
+                            </button>
+
+                            <button
+                                id="gcashButton"
+                                onclick="selectPayment('gcash')"
+                            >
+                                GCash
+                            </button>
+
+                        </div>
+
+                        <div
+                            id="cashPayment"
+                            class="payment-field active"
+                        >
+
+                            <label>
+                                Cash Received
+                            </label>
+
+                            <input
+                                type="number"
+                                id="cashReceived"
+                                placeholder="Enter amount"
+                                oninput="calculateChange()"
+                            >
+
+                            <label>
+                                Change
+                            </label>
+
+                            <input
+                                type="text"
+                                id="change"
+                                value="₱0.00"
+                                readonly
+                            >
+
+                        </div>
+
+                        <div
+                            id="gcashPayment"
+                            class="payment-field"
+                        >
+
+                            <label>
+                                GCash Reference Number
+                            </label>
+
+                            <input
+                                type="text"
+                                id="referenceNumber"
+                                placeholder="Enter 13-digit reference number"
+                                maxlength="13"
+                                required
+                                oninput="validateReferenceInput()"
+                            >
+
+                        </div>
+
+                        <button
+                            class="complete-button"
+                            onclick="completeTransaction()"
+                        >
+                            Complete Transaction
+                        </button>
+
+                        <p id="paymentMessage"></p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+<script>
+
+var taxRate = 12;
+
+var maxQuantity = 15;
+
+var receiptNumber = 1;
+
+var productNames = [
+
+    "Crinkles",
+
+    "Small Taisan Classic cake",
+
+    "Big Taisan Classic cake",
+
+    "Small Taisan Ube Cake",
+
+    "Big Taisan Ube Cake",
+
+    "Small Taisan Mocha Cake",
+
+    "Big Taisan Mocha Cake",
+
+    "Carrot Bars",
+
+    "Brownies",
+
+    "Crema de Fruta",
+
+    "Toasted Mamon"
+
+];
+
+var productPrices = [
+
+    100,
+
+    170,
+
+    320,
+
+    190,
+
+    340,
+
+    190,
+
+    340,
+
+    250,
+
+    250,
+
+    900,
+
+    75
+
+];
+
+var productImages = [
+
+    "images/C.jpg",
+
+    "images/classic.jpg",
+
+    "images/BTCC.jpg",
+
+    "images/STUC.jpg",
+
+    "images/BTUC.jpg",
+
+    "images/STMC.jpg",
+
+    "images/BTMC.jpg",
+
+    "images/CB.jpg",
+
+    "images/B.jpg",
+
+    "images/CDF.jpg",
+
+    "images/TM.jpg"
+
+];
+
+var productQuantity = [];
+
+var cartProductIndex = [];
+
+var cartQuantity = [];
+
+var paymentMethod = "cash";
+
+var i;
+
+for (i = 0; i < productNames.length; i++) {
+
+    productQuantity[i] = 1;
+
+}
+
+function makeLowercase(text) {
+
+    var result = "";
+
+    var i;
+
+    var character;
+
+    for (i = 0; i < text.length; i++) {
+
+        character = text[i];
+
+        if (character == "A")
+            result = result + "a";
+        else if (character == "B")
+            result = result + "b";
+        else if (character == "C")
+            result = result + "c";
+        else if (character == "D")
+            result = result + "d";
+        else if (character == "E")
+            result = result + "e";
+        else if (character == "F")
+            result = result + "f";
+        else if (character == "G")
+            result = result + "g";
+        else if (character == "H")
+            result = result + "h";
+        else if (character == "I")
+            result = result + "i";
+        else if (character == "J")
+            result = result + "j";
+        else if (character == "K")
+            result = result + "k";
+        else if (character == "L")
+            result = result + "l";
+        else if (character == "M")
+            result = result + "m";
+        else if (character == "N")
+            result = result + "n";
+        else if (character == "O")
+            result = result + "o";
+        else if (character == "P")
+            result = result + "p";
+        else if (character == "Q")
+            result = result + "q";
+        else if (character == "R")
+            result = result + "r";
+        else if (character == "S")
+            result = result + "s";
+        else if (character == "T")
+            result = result + "t";
+        else if (character == "U")
+            result = result + "u";
+        else if (character == "V")
+            result = result + "v";
+        else if (character == "W")
+            result = result + "w";
+        else if (character == "X")
+            result = result + "x";
+        else if (character == "Y")
+            result = result + "y";
+        else if (character == "Z")
+            result = result + "z";
+        else
+            result = result + character;
+
+    }
+
+    return result;
+
+}
+
+function productMatches(productName, searchText) {
+
+    var name = makeLowercase(productName);
+
+    var search = makeLowercase(searchText);
+
+    if (search.length == 0) {
+
+        return true;
+
+    }
+
+    var i;
+
+    var j;
+
+    var match;
+
+    for (
+        i = 0;
+        i <= name.length - search.length;
+        i++
+    ) {
+
+        match = true;
+
+        for (
+            j = 0;
+            j < search.length;
+            j++
+        ) {
+
+            if (name[i + j] != search[j]) {
+
+                match = false;
+
+                break;
+
+            }
+
+        }
+
+        if (match == true) {
+
+            return true;
+
+        }
+
+    }
+
+    return false;
+
+}
+
+function numberValue(text) {
+
+    var result = 0;
+
+    var decimal = false;
+
+    var decimalPlace = 0;
+
+    var i;
+
+    var character;
+
+    var digit;
+
+    for (i = 0; i < text.length; i++) {
+
+        character = text[i];
+
+        if (character == ".") {
+
+            decimal = true;
+
+        }
+
+        else {
+
+            digit = -1;
+
+            if (character == "0")
+                digit = 0;
+            else if (character == "1")
+                digit = 1;
+            else if (character == "2")
+                digit = 2;
+            else if (character == "3")
+                digit = 3;
+            else if (character == "4")
+                digit = 4;
+            else if (character == "5")
+                digit = 5;
+            else if (character == "6")
+                digit = 6;
+            else if (character == "7")
+                digit = 7;
+            else if (character == "8")
+                digit = 8;
+            else if (character == "9")
+                digit = 9;
+
+            if (digit >= 0) {
+
+                if (decimal == false) {
+
+                    result =
+                        result * 10 + digit;
+
+                }
+
+                else {
+
+                    decimalPlace =
+                        decimalPlace + 1;
+
+                    if (decimalPlace == 1)
+                        result =
+                            result + digit / 10;
+
+                    else if (decimalPlace == 2)
+                        result =
+                            result + digit / 100;
+
+                    else if (decimalPlace == 3)
+                        result =
+                            result + digit / 1000;
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return result;
+
+}
+
+function money(number) {
+
+    var rounded =
+        Math.round(number * 100) / 100;
+
+    var whole =
+        Math.floor(rounded);
+
+    var decimal =
+        Math.round(
+            (rounded - whole) * 100
+        );
+
+    if (decimal < 10) {
+
+        return "₱" +
+            whole +
+            ".0" +
+            decimal;
+
+    }
+
+    return "₱" +
+        whole +
+        "." +
+        decimal;
+
+}
+
+function displayProducts(searchText) {
+
+    var productGrid =
+        document.getElementById("productGrid");
+
+    productGrid.innerHTML = "";
+
+    if (searchText == undefined) {
+
+        searchText = "";
+
+    }
+
+    var foundProducts = 0;
+
+    var i;
+
+    for (i = 0; i < productNames.length; i++) {
+
+        if (
+            productMatches(
+                productNames[i],
+                searchText
+            ) == false
+        ) {
+
+            continue;
+
+        }
+
+        foundProducts =
+            foundProducts + 1;
+
+        var card =
+            document.createElement("div");
+
+        card.className =
+            "product-card";
+
+        var image =
+            document.createElement("img");
+
+        image.src =
+            productImages[i];
+
+        image.alt =
+            productNames[i];
+
+        image.className =
+            "product-image";
+
+        var name =
+            document.createElement("h3");
+
+        name.innerHTML =
+            productNames[i];
+
+        var price =
+            document.createElement("div");
+
+        price.className =
+            "product-price";
+
+        price.innerHTML =
+            money(productPrices[i]);
+
+        var quantityControl =
+            document.createElement("div");
+
+        quantityControl.className =
+            "quantity-control";
+
+        var minusButton =
+            document.createElement("button");
+
+        minusButton.innerHTML =
+            "-";
+
+        minusButton.onclick =
+            createMinusFunction(i);
+
+        var quantityInput =
+            document.createElement("input");
+
+        quantityInput.type =
+            "number";
+
+        quantityInput.className =
+            "quantity-input";
+
+        quantityInput.id =
+            "quantity-" + i;
+
+        quantityInput.value =
+            productQuantity[i];
+
+        quantityInput.min =
+            "1";
+
+        quantityInput.max =
+            "15";
+
+        quantityInput.onchange =
+            createQuantityFunction(i);
+
+        var plusButton =
+            document.createElement("button");
+
+        plusButton.innerHTML =
+            "+";
+
+        plusButton.onclick =
+            createPlusFunction(i);
+
+        var addButton =
+            document.createElement("button");
+
+        addButton.className =
+            "add-button";
+
+        addButton.innerHTML =
+            "Add";
+
+        addButton.onclick =
+            createAddFunction(i);
+
+        quantityControl.appendChild(
+            minusButton
+        );
+
+        quantityControl.appendChild(
+            quantityInput
+        );
+
+        quantityControl.appendChild(
+            plusButton
+        );
+
+        card.appendChild(image);
+
+        card.appendChild(name);
+
+        card.appendChild(price);
+
+        card.appendChild(quantityControl);
+
+        card.appendChild(addButton);
+
+        productGrid.appendChild(card);
+
+    }
+
+    if (foundProducts == 0) {
+
+        var noProducts =
+            document.createElement("div");
+
+        noProducts.className =
+            "no-products";
+
+        noProducts.innerHTML =
+            "No products found.";
+
+        productGrid.appendChild(
+            noProducts
+        );
+
+    }
+
+}
+
+function createMinusFunction(index) {
+
+    return function() {
+
+        changeProductQuantity(
+            index,
+            -1
+        );
+
+    };
+
+}
+
+function createPlusFunction(index) {
+
+    return function() {
+
+        changeProductQuantity(
+            index,
+            1
+        );
+
+    };
+
+}
+
+function createQuantityFunction(index) {
+
+    return function() {
+
+        setProductQuantity(index);
+
+    };
+
+}
+
+function createAddFunction(index) {
+
+    return function() {
+
+        addToCart(index);
+
+    };
+
+}
+
+function createRemoveFunction(index) {
+
+    return function() {
+
+        removeFromCart(index);
+
+    };
+
+}
+
+function changeProductQuantity(index, amount) {
+
+    var newQuantity =
+        productQuantity[index] + amount;
+
+    if (newQuantity < 1) {
+
+        var paymentMessage =
+            document.getElementById(
+                "paymentMessage"
+            );
+
+        paymentMessage.innerHTML =
+            "Enter a valid quantity.";
+
+        paymentMessage.style.color =
+            "red";
+
+        return;
+
+    }
+
+    if (newQuantity > maxQuantity) {
+
+        newQuantity =
+            maxQuantity;
+
+    }
+
+    productQuantity[index] =
+        newQuantity;
+
+    var searchText =
+        document.getElementById(
+            "productSearch"
+        ).value;
+
+    displayProducts(searchText);
+
+}
+
+function setProductQuantity(index) {
+
+    var quantityInput =
+        document.getElementById(
+            "quantity-" + index
+        );
+
+    var quantityText =
+        quantityInput.value;
+
+    var quantity =
+        numberValue(quantityText);
+
+    if (
+        quantityText == "" ||
+        quantity <= 0
+    ) {
+
+        var paymentMessage =
+            document.getElementById(
+                "paymentMessage"
+            );
+
+        paymentMessage.innerHTML =
+            "Enter a valid quantity.";
+
+        paymentMessage.style.color =
+            "red";
+
+        productQuantity[index] =
+            1;
+
+        var searchText =
+            document.getElementById(
+                "productSearch"
+            ).value;
+
+        displayProducts(searchText);
+
+        return;
+
+    }
+
+    if (quantity > maxQuantity) {
+
+        quantity =
+            maxQuantity;
+
+    }
+
+    productQuantity[index] =
+        quantity;
+
+    var searchText =
+        document.getElementById(
+            "productSearch"
+        ).value;
+
+    displayProducts(searchText);
+
+}
+
+function searchProducts() {
+
+    var searchInput =
+        document.getElementById(
+            "productSearch"
+        );
+
+    var searchText =
+        searchInput.value;
+
+    displayProducts(searchText);
+
+}
+
+function clearSearch() {
+
+    var searchInput =
+        document.getElementById(
+            "productSearch"
+        );
+
+    searchInput.value = "";
+
+    displayProducts("");
+
+}
+
+function addToCart(productIndex) {
+
+    var quantity =
+        productQuantity[productIndex];
+
+    if (
+        quantity < 1 ||
+        quantity > maxQuantity
+    ) {
+
+        var paymentMessage =
+            document.getElementById(
+                "paymentMessage"
+            );
+
+        paymentMessage.innerHTML =
+            "Enter a valid quantity.";
+
+        paymentMessage.style.color =
+            "red";
+
+        return;
+
+    }
+
+    var found = false;
+
+    var i;
+
+    for (
+        i = 0;
+        i < cartProductIndex.length;
+        i++
+    ) {
+
+        if (
+            cartProductIndex[i] ==
+            productIndex
+        ) {
+
+            if (
+                cartQuantity[i] + quantity >
+                maxQuantity
+            ) {
+
+                cartQuantity[i] =
+                    maxQuantity;
+
+                found = true;
+
+                break;
+
+            }
+
+            cartQuantity[i] =
+                cartQuantity[i] + quantity;
+
+            found = true;
+
+            break;
+
+        }
+
+    }
+
+    if (found == false) {
+
+        var position =
+            cartProductIndex.length;
+
+        cartProductIndex[position] =
+            productIndex;
+
+        cartQuantity[position] =
+            quantity;
+
+    }
+
+    productQuantity[productIndex] =
+        1;
+
+    var searchText =
+        document.getElementById(
+            "productSearch"
+        ).value;
+
+    displayProducts(searchText);
+
+    displayReceipt();
+
+}
+
+function getTotal() {
+
+    var total = 0;
+
+    var i;
+
+    var productIndex;
+
+    for (
+        i = 0;
+        i < cartProductIndex.length;
+        i++
+    ) {
+
+        productIndex =
+            cartProductIndex[i];
+
+        total =
+            total +
+            productPrices[productIndex] *
+            cartQuantity[i];
+
+    }
+
+    return total;
+
+}
+
+function getTotalTax() {
+
+    var total =
+        getTotal();
+
+    var tax =
+        total *
+        taxRate /
+        (100 + taxRate);
+
+    return tax;
+
+}
+
+function displayReceipt() {
+
+    var receiptBody =
+        document.getElementById(
+            "receiptBody"
+        );
+
+    var emptyCart =
+        document.getElementById(
+            "emptyCart"
+        );
+
+    var receiptNumberDisplay =
+        document.getElementById(
+            "receiptNumber"
+        );
+
+    receiptNumberDisplay.innerHTML =
+        "Receipt No.: " +
+        receiptNumber;
+
+    receiptBody.innerHTML = "";
+
+    if (
+        cartProductIndex.length == 0
+    ) {
+
+        emptyCart.style.display =
+            "block";
+
+    }
+
+    else {
+
+        emptyCart.style.display =
+            "none";
+
+    }
+
+    var total = 0;
+
+    var i;
+
+    for (
+        i = 0;
+        i < cartProductIndex.length;
+        i++
+    ) {
+
+        var productIndex =
+            cartProductIndex[i];
+
+        var itemTotal =
+            productPrices[productIndex] *
+            cartQuantity[i];
+
+        total =
+            total + itemTotal;
+
+        var row =
+            document.createElement("tr");
+
+        var productCell =
+            document.createElement("td");
+
+        productCell.innerHTML =
+            productNames[productIndex];
+
+        var quantityCell =
+            document.createElement("td");
+
+        quantityCell.innerHTML =
+            cartQuantity[i];
+
+        var priceCell =
+            document.createElement("td");
+
+        priceCell.innerHTML =
+            money(
+                productPrices[productIndex]
+            );
+
+        var totalCell =
+            document.createElement("td");
+
+        totalCell.innerHTML =
+            money(itemTotal);
+
+        var removeCell =
+            document.createElement("td");
+
+        var removeButton =
+            document.createElement("button");
+
+        removeButton.className =
+            "remove-button";
+
+        removeButton.innerHTML =
+            "X";
+
+        removeButton.onclick =
+            createRemoveFunction(i);
+
+        removeCell.appendChild(
+            removeButton
+        );
+
+        row.appendChild(
+            productCell
+        );
+
+        row.appendChild(
+            quantityCell
+        );
+
+        row.appendChild(
+            priceCell
+        );
+
+        row.appendChild(
+            totalCell
+        );
+
+        row.appendChild(
+            removeCell
+        );
+
+        receiptBody.appendChild(
+            row
+        );
+
+    }
+
+    var totalTax =
+        getTotalTax();
+
+    document.getElementById(
+        "subtotal"
+    ).innerHTML =
+        money(total);
+
+    document.getElementById(
+        "totalTax"
+    ).innerHTML =
+        money(totalTax);
+
+    document.getElementById(
+        "totalAmount"
+    ).innerHTML =
+        money(total);
+
+    calculateChange();
+
+}
+
+function removeFromCart(index) {
+
+    var i;
+
+    for (
+        i = index;
+        i < cartProductIndex.length - 1;
+        i++
+    ) {
+
+        cartProductIndex[i] =
+            cartProductIndex[i + 1];
+
+        cartQuantity[i] =
+            cartQuantity[i + 1];
+
+    }
+
+    cartProductIndex.length =
+        cartProductIndex.length - 1;
+
+    cartQuantity.length =
+        cartQuantity.length - 1;
+
+    displayReceipt();
+
+}
+
+function selectPayment(method) {
+
+    paymentMethod =
+        method;
+
+    var cashButton =
+        document.getElementById(
+            "cashButton"
+        );
+
+    var gcashButton =
+        document.getElementById(
+            "gcashButton"
+        );
+
+    var cashPayment =
+        document.getElementById(
+            "cashPayment"
+        );
+
+    var gcashPayment =
+        document.getElementById(
+            "gcashPayment"
+        );
+
+    if (method == "cash") {
+
+        cashButton.className =
+            "active";
+
+        gcashButton.className =
+            "";
+
+        cashPayment.className =
+            "payment-field active";
+
+        gcashPayment.className =
+            "payment-field";
+
+    }
+
+    else {
+
+        gcashButton.className =
+            "active";
+
+        cashButton.className =
+            "";
+
+        gcashPayment.className =
+            "payment-field active";
+
+        cashPayment.className =
+            "payment-field";
+
+    }
+
+    document.getElementById(
+        "paymentMessage"
+    ).innerHTML = "";
+
+}
+
+function validateReferenceInput() {
+
+    var referenceInput =
+        document.getElementById(
+            "referenceNumber"
+        );
+
+    var reference =
+        referenceInput.value;
+
+    var result = "";
+
+    var i;
+
+    var character;
+
+    for (
+        i = 0;
+        i < reference.length;
+        i++
+    ) {
+
+        character =
+            reference[i];
+
+        if (
+            character == "0" ||
+            character == "1" ||
+            character == "2" ||
+            character == "3" ||
+            character == "4" ||
+            character == "5" ||
+            character == "6" ||
+            character == "7" ||
+            character == "8" ||
+            character == "9"
+        ) {
+
+            if (result.length < 13) {
+
+                result =
+                    result + character;
+
+            }
+
+        }
+
+    }
+
+    referenceInput.value =
+        result;
+
+}
+
+function calculateChange() {
+
+    var total =
+        getTotal();
+
+    var cashText =
+        document.getElementById(
+            "cashReceived"
+        ).value;
+
+    var cashReceived =
+        numberValue(cashText);
+
+    var changeField =
+        document.getElementById(
+            "change"
+        );
+
+    if (
+        cashText == "" ||
+        cashReceived < total
+    ) {
+
+        changeField.value =
+            "₱0.00";
+
+    }
+
+    else {
+
+        var change =
+            cashReceived - total;
+
+        changeField.value =
+            money(change);
+
+    }
+
+}
+
+function completeTransaction() {
+
+    var paymentMessage =
+        document.getElementById(
+            "paymentMessage"
+        );
+
+    if (
+        cartProductIndex.length == 0
+    ) {
+
+        paymentMessage.innerHTML =
+            "Please add at least one product.";
+
+        paymentMessage.style.color =
+            "red";
+
+        return;
+
+    }
+
+    var total =
+        getTotal();
+
+    if (paymentMethod == "cash") {
+
+        var cashText =
+            document.getElementById(
+                "cashReceived"
+            ).value;
+
+        var cashReceived =
+            numberValue(cashText);
+
+        if (cashText == "") {
+
+            paymentMessage.innerHTML =
+                "Please enter the cash received.";
+
+            paymentMessage.style.color =
+                "red";
+
+            return;
+
+        }
+
+        if (cashReceived < total) {
+
+            paymentMessage.innerHTML =
+                "Insufficient cash amount.";
+
+            paymentMessage.style.color =
+                "red";
+
+            return;
+
+        }
+
+        var change =
+            cashReceived - total;
+
+        paymentMessage.innerHTML =
+            "Transaction completed! Change: " +
+            money(change);
+
+        paymentMessage.style.color =
+            "#198754";
+
+    }
+
+    else {
+
+        var referenceNumber =
+            document.getElementById(
+                "referenceNumber"
+            ).value;
+
+        if (referenceNumber.length != 13) {
+
+            paymentMessage.innerHTML =
+                "GCash reference number must be exactly 13 digits.";
+
+            paymentMessage.style.color =
+                "red";
+
+            return;
+
+        }
+
+        var validReference = true;
+
+        var i;
+
+        var character;
+
+        for (
+            i = 0;
+            i < referenceNumber.length;
+            i++
+        ) {
+
+            character =
+                referenceNumber[i];
+
+            if (
+                character != "0" &&
+                character != "1" &&
+                character != "2" &&
+                character != "3" &&
+                character != "4" &&
+                character != "5" &&
+                character != "6" &&
+                character != "7" &&
+                character != "8" &&
+                character != "9"
+            ) {
+
+                validReference = false;
+
+                break;
+
+            }
+
+        }
+
+        if (validReference == false) {
+
+            paymentMessage.innerHTML =
+                "GCash reference number must contain numbers only.";
+
+            paymentMessage.style.color =
+                "red";
+
+            return;
+
+        }
+
+        paymentMessage.innerHTML =
+            "GCash payment completed! Reference: " +
+            referenceNumber;
+
+        paymentMessage.style.color =
+            "#198754";
+
+    }
+
+    receiptNumber =
+        receiptNumber + 1;
+
+    cartProductIndex.length = 0;
+
+    cartQuantity.length = 0;
+
+    document.getElementById(
+        "cashReceived"
+    ).value = "";
+
+    document.getElementById(
+        "referenceNumber"
+    ).value = "";
+
+    document.getElementById(
+        "change"
+    ).value =
+        "₱0.00";
+
+    displayReceipt();
+
+}
+
+function logout() {
+
+    window.location.href =
+        "login.html";
+
+}
+
+displayProducts("");
+
+displayReceipt();
+
+</script>
+
+</body>
+</html>
